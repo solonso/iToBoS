@@ -1,5 +1,6 @@
-.pt
-.txt
-itobos-2024-detection
-runs
-split_dataset
+*.pt
+*.txt
+itobos-2024-detection/
+runs/
+split_dataset/
+dummy_data/

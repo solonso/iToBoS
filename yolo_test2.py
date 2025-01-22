@@ -62,7 +62,7 @@ def format_predictions(predictions):
                 prediction_string += f" {box[0]} {box[1]} {box[2]} {box[3]} {labels[0]}"
             prediction_string = prediction_string.strip()  # Remove trailing space
         else:
-            prediction_string = " "
+            prediction_string = " "   
         output_lines.append(f"{image_id},{prediction_string}")
 
     return output_lines
@@ -95,20 +95,20 @@ def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
 
         # Check if there are predictions, and provide valid empty tensors if not
         if len(result[0].boxes) > 0:  # Check if any bounding boxes were detected
-            preds = result[0].boxes.xywhn.cpu().numpy()  # Bounding boxes in [x_center, y_center, width, height]
+            preds = result[0].boxes.xyxy.cpu().numpy()  # Bounding boxes in [x_center, y_center, width, height]
             confs = result[0].boxes.conf.cpu().numpy()  # Confidence scores
             classes = result[0].boxes.cls.cpu().numpy()  # Predicted classes
         else:
-            preds = np.zeros((0, 4))  # No bounding boxes
-            confs = np.zeros((0,))
-            classes = np.zeros((0,))
+            preds = torch.zeros((0, 4))  # No bounding boxes
+            confs = torch.zeros((0,))
+            classes = torch.zeros((0,))
 
         # Store predictions for this image
         predictions.append({
             "image": os.path.basename(img_path).split(".")[0],  # Use the image name without extension
             "boxes": preds,
             "scores": confs,
-            "labels": classes.astype(int),  # Ensure labels are integers
+            "labels": classes,  # Ensure labels are integers
         })
 
     if compute_mAP:
@@ -142,7 +142,8 @@ def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
 
 
 
-test(model_pth="runs/model_3_layer/weights/best.pt",
-     test_images_path="/home/mfa/My_Data/Semester1/ML/iToBoS/dummy_data",
-     test_labels_path= None,
-     compute_mAP=False)
+test(model_pth="runs/model_auto_opt1/weights/best.pt",
+     test_images_path="/home/mfa/My_Data/Semester1/ML/iToBoS/itobos-2024-detection/_test/images",
+     test_labels_path= None,#"split_dataset/test/labels",
+     compute_mAP=False
+     )
