@@ -19,25 +19,31 @@ args_file_path = 'params.yaml'  # Replace with the actual path to your args.yaml
 with open(args_file_path, 'r') as file:
     args = yaml.safe_load(file)
 
-model = YOLO("yolov9e.pt") 
+model = YOLO("yolov8s.pt") 
 # print(model.model)  
 # train_path = "split_dataset/train/images/"
 # Trueval_path = "split_dataset/val"
 
-model.add_callback("on_train_start", freeze_layer)
+# model.add_callback("on_train_start", freeze_layer)
  
 results = model.train(
-    data="params.yaml",#args.get("path"),
-    imgsz=args.get("imgsz"),  # Resize images to 640x640 (you can try 800x800 based on GPU memory)
-    epochs=args.get("epochs"),  # Number o+++++++++++++++++++++++f epochs
-    batch=args.get("batch"),  # Batch size
-    workers=args.get("workers"),  # Number of workers for data loading
-    project=args.get("project"),  # Output directory
-    name="model_3_layer",  # Experiment name
-    exist_ok=True,  # Restart training if the output directory exists
-    patience=10,  # Early stopping patience (epochs)
-    plots=True,  # Generate plots during training
-    device='0',  # Use GPU 0; set to -1 for CP
-    rect=True,  # Enable rectangular batching to preserve aspect ratio
-    augment=True,  # Apply augmentations (e.g., flip, rotation, brightness)
+    data="params.yaml",      # Dataset configuration
+    imgsz=640,               # Reduced image size for stability
+    epochs=100,              # Number of epochs
+    batch=32,                # Safer batch size
+    single_cls=True,         # Single-class detection
+    warmup_epochs=3,         # Enable warmup
+    optimizer="AdamW",       # Use AdamW optimizer
+    lr0=0.003,               # Reduced learning rate
+    # lrf=0.1,                 # Learning rate final multiplier
+    workers=8,               # Number of data loading workers
+    project=args.get("project"),
+    name="model_auto_opt1",
+    exist_ok=True,           # Restart training if the output directory exists
+    patience=5,              # Early stopping patience
+    plots=True,              # Generate training plots
+    device='0',              # Use GPU 0
+    val=True,                # Perform validation
+    rect=True,               # Rectangular training batches
+    
 )
