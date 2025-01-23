@@ -28,12 +28,12 @@ def load_ground_truth(label_path, image_folder):
                 x_max = (x_center + width / 2) * image_width
                 y_max = (y_center + height / 2) * image_height
                 boxes.append([x_min, y_min, x_max, y_max])
-                labels.append(int(class_id))
+                labels.append(int(class_id))  # Ensure class_id is an integer
 
         ground_truth.append({
             "image_id": image_id,
             "boxes": torch.tensor(boxes, dtype=torch.float32),
-            "labels": torch.tensor(labels, dtype=torch.int64)
+            "labels": torch.tensor(labels, dtype=torch.int64)  # Ensure labels are integers
         })
 
     return ground_truth
@@ -45,7 +45,6 @@ def get_image_id(image_path):
     image_id = int(image_name.split("_")[1])  # Extract numeric ID
     return image_id
 
-# Step 5: Format predictions for output
 def format_predictions(predictions):
     """
     Formats predictions into a CSV-style format for saving.
@@ -57,9 +56,9 @@ def format_predictions(predictions):
         confs = pred["scores"]
         labels = pred["labels"]
         prediction_string = " "
-        if len(preds) >0:
-            for box, cls in zip(preds,labels):
-                prediction_string += f" {box[0]} {box[1]} {box[2]} {box[3]} {labels[0]}"
+        if len(preds) > 0:
+            for box, conf, cls in zip(preds, confs, labels):
+                prediction_string += f"{box[0]:.2f} {box[1]:.2f} {box[2]:.2f} {box[3]:.2f} {int(cls)} {conf:.2f} "
             prediction_string = prediction_string.strip()  # Remove trailing space
         else:
             prediction_string = " "   
@@ -67,7 +66,7 @@ def format_predictions(predictions):
 
     return output_lines
 
-def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
+def test(model_pth, test_images_path, test_labels_path, compute_mAP=False):
     # Step 1: Load the trained YOLO model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
@@ -84,7 +83,7 @@ def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
     if len(test_images) == 0:
         raise ValueError(f"No valid image files found in {test_images_path} (supported: .jpg, .png)")
     if compute_mAP:
-    # Ensure the folder exists
+        # Ensure the folder exists
         if not os.path.exists(test_images_path) or not os.path.exists(test_labels_path):
             raise FileNotFoundError("Test images or labels path does not exist.")
 
@@ -95,13 +94,13 @@ def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
 
         # Check if there are predictions, and provide valid empty tensors if not
         if len(result[0].boxes) > 0:  # Check if any bounding boxes were detected
-            preds = result[0].boxes.xyxy.cpu().numpy()  # Bounding boxes in [x_center, y_center, width, height]
-            confs = result[0].boxes.conf.cpu().numpy()  # Confidence scores
-            classes = result[0].boxes.cls.cpu().numpy()  # Predicted classes
+            preds = torch.tensor(result[0].boxes.xyxy.cpu().numpy(), dtype=torch.float32)  # Bounding boxes in [x_min, y_min, x_max, y_max]
+            confs = torch.tensor(result[0].boxes.conf.cpu().numpy(), dtype=torch.float32)  # Confidence scores
+            classes = torch.tensor(result[0].boxes.cls.cpu().numpy(), dtype=torch.int64)  # Predicted classes as integers
         else:
-            preds = torch.zeros((0, 4))  # No bounding boxes
-            confs = torch.zeros((0,))
-            classes = torch.zeros((0,))
+            preds = torch.zeros((0, 4), dtype=torch.float32)  # No bounding boxes
+            confs = torch.zeros((0,), dtype=torch.float32)
+            classes = torch.zeros((0,), dtype=torch.int64)
 
         # Store predictions for this image
         predictions.append({
@@ -125,10 +124,9 @@ def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
         print(f"mAP@0.5: {map_results['map_50']:.4f}")
         print(f"mAP@0.5:0.95: {map_results['map']:.4f}")
 
-
     # Generate formatted predictions
     formatted_predictions = format_predictions(predictions)
-    # Step 6: Save results to a text file
+    # Save results to a CSV file
     output_file = "predictions.csv"
     with open(output_file, mode="w", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
@@ -141,9 +139,10 @@ def test(model_pth,test_images_path,test_labels_path,compute_mAP=False):
     print(f"Predictions saved to {output_file}")
 
 
-
-test(model_pth="runs/model_auto_opt1/weights/best.pt",
-     test_images_path="/home/mfa/My_Data/Semester1/ML/iToBoS/itobos-2024-detection/_test/images",
-     test_labels_path= None,#"split_dataset/test/labels",
-     compute_mAP=False
-     )
+# Run the test function
+test(
+    model_pth="runs/model_auto_opt2_lr0005/weights/best.pt",
+    test_images_path="/home/mfa/My_Data/Semester1/ML/iToBoS/dummy_data/images/",
+    test_labels_path="/home/mfa/My_Data/Semester1/ML/iToBoS/dummy_data/labels/",
+    compute_mAP=True
+)
