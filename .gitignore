@@ -1,6 +1,17 @@
+__pycache__/
+*.pyc
 *.pt
 *.txt
+*.pth
 itobos-2024-detection/
 runs/
 split_dataset/
+split_dataset_blurred/
 dummy_data/
+lesion_detection/
+Lesion-Detection-Challange/
+pipeline_models/
+bbox_preds/
+bmvit_classify/
+dummy_data/
+MedViT/CustomDataset/runs/

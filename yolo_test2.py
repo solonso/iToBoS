@@ -33,7 +33,7 @@ def load_ground_truth(label_path, image_folder):
         ground_truth.append({
             "image_id": image_id,
             "boxes": torch.tensor(boxes, dtype=torch.float32),
-            "labels": torch.tensor(labels, dtype=torch.int64)  # Ensure labels are integers
+            "labels": torch.tensor(labels)  # Ensure labels are integers
         })
 
     return ground_truth
@@ -58,7 +58,7 @@ def format_predictions(predictions):
         prediction_string = " "
         if len(preds) > 0:
             for box, conf, cls in zip(preds, confs, labels):
-                prediction_string += f"{box[0]:.2f} {box[1]:.2f} {box[2]:.2f} {box[3]:.2f} {int(cls)} {conf:.2f} "
+                prediction_string += f"{box[0]:.2f} {box[1]:.2f} {box[2]:.2f} {box[3]:.2f} {int(cls)} "
             prediction_string = prediction_string.strip()  # Remove trailing space
         else:
             prediction_string = " "   
@@ -66,6 +66,12 @@ def format_predictions(predictions):
 
     return output_lines
 
+def extract_id(filename):
+    base_name = os.path.basename(filename)  # Extract just the filename
+    numeric_part = base_name.split("_")[-1].split(".")[0]  # Split and get the numeric part
+    return int(numeric_part)  # Convert to integer for sorting
+    
+    
 def test(model_pth, test_images_path, test_labels_path, compute_mAP=False):
     # Step 1: Load the trained YOLO model
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -87,20 +93,24 @@ def test(model_pth, test_images_path, test_labels_path, compute_mAP=False):
         if not os.path.exists(test_images_path) or not os.path.exists(test_labels_path):
             raise FileNotFoundError("Test images or labels path does not exist.")
 
+
+    # Sort test_images based on the extracted ID
+    sorted_test_images = sorted(test_images, key=extract_id)
+
     # Step 4: Run inference on test images
     predictions = []
-    for img_path in test_images:
-        result = model(img_path)  # Get predictions for each image
+    for img_path in sorted_test_images:
+        result = model(img_path, conf=0.1, iou=0.7, agnostic_nms=True, max_det=500) # Get predictions for each image
 
         # Check if there are predictions, and provide valid empty tensors if not
         if len(result[0].boxes) > 0:  # Check if any bounding boxes were detected
-            preds = torch.tensor(result[0].boxes.xyxy.cpu().numpy(), dtype=torch.float32)  # Bounding boxes in [x_min, y_min, x_max, y_max]
-            confs = torch.tensor(result[0].boxes.conf.cpu().numpy(), dtype=torch.float32)  # Confidence scores
-            classes = torch.tensor(result[0].boxes.cls.cpu().numpy(), dtype=torch.int64)  # Predicted classes as integers
+            preds = torch.from_numpy(result[0].boxes.xyxy.cpu().numpy())  # Bounding boxes in [x_min, y_min, x_max, y_max]
+            confs = torch.from_numpy(result[0].boxes.conf.cpu().numpy())  # Confidence scores
+            classes = torch.from_numpy(result[0].boxes.cls.cpu().numpy()).int()  # Predicted classes as integers
         else:
             preds = torch.zeros((0, 4), dtype=torch.float32)  # No bounding boxes
             confs = torch.zeros((0,), dtype=torch.float32)
-            classes = torch.zeros((0,), dtype=torch.int64)
+            classes = torch.zeros((0,), dtype=torch.int)
 
         # Store predictions for this image
         predictions.append({
@@ -119,7 +129,7 @@ def test(model_pth, test_images_path, test_labels_path, compute_mAP=False):
         for pred, gt in zip(predictions, ground_truth):
             map_metric.update([pred], [gt])
 
-        map_results = map_metric.compute()
+        map_results = map_metric.compute()["map"]
         print("mAP Results:")
         print(f"mAP@0.5: {map_results['map_50']:.4f}")
         print(f"mAP@0.5:0.95: {map_results['map']:.4f}")
@@ -141,8 +151,8 @@ def test(model_pth, test_images_path, test_labels_path, compute_mAP=False):
 
 # Run the test function
 test(
-    model_pth="runs/model_auto_opt2_lr0005/weights/best.pt",
-    test_images_path="/home/mfa/My_Data/Semester1/ML/iToBoS/dummy_data/images/",
-    test_labels_path="/home/mfa/My_Data/Semester1/ML/iToBoS/dummy_data/labels/",
-    compute_mAP=True
+    model_pth="runs/lesion_detection_model_37_box66/weights/best.pt",
+    test_images_path= "itobos-2024-detection/_test/images",#split_dataset/test/images",#"dummy_data/images",#
+    test_labels_path= None,#"split_dataset/test/labels",#"dummy_data/labels",
+    compute_mAP=False
 )
