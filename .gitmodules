@@ -1,3 +1,6 @@
 [submodule "MedViT"]
 	path = MedViT
 	url = https://github.com/Omid-Nejati/MedViT
+[submodule "Lesion-Detection-Challange"]
+	path = Lesion-Detection-Challange
+	url = https://github.com/iToBoS/Lesion-Detection-Challange
