@@ -1,5 +1,5 @@
 train: /home/chibuzo/My_Data/Semester1/ML/iToBoS/split_dataset_blurred/train/images
-val: /home/mfa/My_Data/Semester1/ML/iToBoS/split_dataset_blurred/val/images
+val: /home/chibuzo/My_Data/Semester1/ML/iToBoS/split_dataset_blurred/val/images
 test: /home/mfa/My_Data/Semester1/ML/iToBoS/split_dataset_blurred/test/images  # Optional
 nc: 1                              # Number of classes
 names: ['lesion']                  # Class names
