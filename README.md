@@ -18,7 +18,7 @@
 - Utilities for dataset preparation, split, and evaluation
 - Example submissions produced by the pipeline
 
-## Approach in one page
+## Approach
 
 ### 1) Detector
 - Ultralytics YOLO models (see `yolo_train.py`)
