@@ -1,8 +1,8 @@
 # iToBoS 2024 Detection (Kaggle) – Solution Repository
 
 ## Team
-- Solomon Chibuzo Nwafor ([https://github.com/solonso](https://github.com/solonso))
-- Muhammad Faran Akram ([https://github.com/mfa006](https://github.com/mfa006))
+- [Solomon Chibuzo Nwafor](https://github.com/solonso)
+- [Muhammad Faran Akram](https://github.com/mfa006)
 
 ## Competition
 - iToBoS 2024 – Skin Lesion Detection with 3D-TBP
