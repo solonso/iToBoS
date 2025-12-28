@@ -72,8 +72,8 @@ iToBoS-main/
 
 ### 1) Clone with submodules
 ```bash
-git clone --recursive <your repo url>
-cd iToBoS-main
+git clone --recursive https://github.com/solonso/iToBoS.git
+cd iToBoS
 ```
 
 ### 2) Install dependencies
