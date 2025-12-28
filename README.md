@@ -7,6 +7,9 @@
 ## Competition
 - iToBoS 2024 – Skin Lesion Detection with 3D-TBP
 - Kaggle link: [https://www.kaggle.com/competitions/itobos-2024-detection](https://www.kaggle.com/competitions/itobos-2024-detection)
+- NinjaX Result:
+
+![Kaggle results](results/kaglle_results.png)
 
 ## Goal
 - Detect skin lesions in high resolution skin patch images
@@ -25,6 +28,8 @@
 - Train on YOLO format labels
 - Use a 1024 input size at inference (see `yolo_test2.py` and `test_models.py`)
 
+![Training curves](results/itobos_result.png)
+
 ### 2) Data preparation trick
 - Blur non skin background to reduce background driven false positives
 - Script: `preprocess.py`
@@ -37,6 +42,8 @@
   - YOLO confidence is high (hard keep), or
   - MedViT predicts lesion (keep), else drop
 - Script: `test_models.py`
+
+![Training curves](results/itobos_prediction.png)
 
 ### 4) Submission formatting
 - `prediction_string` stores repeated groups of 5 values
