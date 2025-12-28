@@ -12,7 +12,7 @@
 - Detect skin lesions in high resolution skin patch images
 - Output bounding boxes per image in the Kaggle submission format
 
-## What this repo contains
+## repo content
 - Training and inference scripts for a YOLO based detector
 - A second stage classifier filter (MedViT) to remove false positives
 - Utilities for dataset preparation, split, and evaluation
